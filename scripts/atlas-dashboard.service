@@ -1,0 +1,17 @@
+[Unit]
+Description=ATLAS MACRO Streamlit Dashboard
+After=network.target
+
+[Service]
+Type=simple
+User=safrtam
+Group=safrtam
+WorkingDirectory=/home/safrtam/atlas_macro
+Environment="PATH=/home/safrtam/atlas_macro/.venv/bin"
+Environment="PYTHONPATH=/home/safrtam/atlas_macro/src"
+ExecStart=/home/safrtam/atlas_macro/.venv/bin/streamlit run src/atlas_macro/dashboard/app.py --server.port 8505 --server.headless true --server.address 127.0.0.1
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

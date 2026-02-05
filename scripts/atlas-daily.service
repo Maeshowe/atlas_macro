@@ -1,0 +1,17 @@
+[Unit]
+Description=ATLAS MACRO Daily Stress Diagnostic
+After=network.target
+
+[Service]
+Type=oneshot
+User=safrtam
+Group=safrtam
+WorkingDirectory=/home/safrtam/atlas_macro
+Environment="PATH=/home/safrtam/atlas_macro/.venv/bin"
+Environment="PYTHONPATH=/home/safrtam/atlas_macro/src"
+ExecStart=/home/safrtam/atlas_macro/.venv/bin/python scripts/run_daily.py -v
+StandardOutput=append:/home/safrtam/atlas_macro/logs/daily.log
+StandardError=append:/home/safrtam/atlas_macro/logs/daily.log
+
+[Install]
+WantedBy=multi-user.target

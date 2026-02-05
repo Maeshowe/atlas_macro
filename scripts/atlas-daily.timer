@@ -1,0 +1,13 @@
+[Unit]
+Description=ATLAS MACRO Daily Stress Diagnostic Timer
+Requires=atlas-daily.service
+
+[Timer]
+# Run at 21:30 UTC (22:30 CET) on weekdays
+# 30 minutes after OBSIDIAN to avoid Polygon API contention
+OnCalendar=Mon..Fri 21:30 UTC
+Persistent=true
+RandomizedDelaySec=300
+
+[Install]
+WantedBy=timers.target
