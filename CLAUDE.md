@@ -35,16 +35,17 @@ ingest (async) → features → normalization → classifier → explain → pip
 - No hysteresis. Each day is independent.
 
 ## Nexus_Core API Notes
-- **Polygon `indices-aggs`**: `indexTicker` param is NOT aliased — must use exact name
-- **Polygon `aggs_daily`**: `ticker` aliased from `symbol`; `from`/`to` aliased from `start`/`end`
-- **VIX**: `get_polygon_data(session, "indices-aggs", indexTicker="I:VIX", multiplier=1, timespan="day", start=..., end=...)`
-- **FRED**: `get_fred_data(session, "series", series_id="DGS10")` etc.
+- **Polygon `aggs_daily`**: Required params: `symbol`, `start`, `end`. Optional: `adjusted`, `sort`, `limit`
+- **Polygon has NO `indices-aggs` endpoint** — VIX is fetched from FRED instead
+- **FRED `series`**: Required: `series_id`. Optional: `observation_start`, `observation_end`, `sort_order`, `limit`
+- Polygon index prices: `get_polygon_data(session, "aggs_daily", symbol="SPY", start=..., end=...)`
+- FRED series: `get_fred_data(session, "series", series_id="DGS10", observation_start=..., observation_end=...)`
 
 ## Data Sources
 | Data | Source | Endpoint |
 |------|--------|----------|
-| VIX | Polygon (primary), FRED VIXCLS (fallback) | `indices-aggs` |
-| SPY/QQQ/IWM/DIA prices | Polygon | `aggs_daily` |
+| VIX | FRED | `VIXCLS` |
+| SPY/QQQ/IWM/DIA prices | Polygon | `aggs_daily` (param: `symbol`) |
 | 10Y Treasury (TNX) | FRED | `DGS10` |
 | Yield curve | FRED | `T10Y2Y` |
 | HY credit spread | FRED | `BAMLH0A0HYM2` |

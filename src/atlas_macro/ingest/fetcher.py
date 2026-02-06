@@ -101,33 +101,7 @@ class MacroDataFetcher:
             )
 
     async def _fetch_vix(self, session: aiohttp.ClientSession, start: str, end: str) -> dict:
-        """Fetch VIX from Polygon (I:VIX via indices-aggs), fallback to FRED (VIXCLS)."""
-        # Primary: Polygon indices-aggs
-        # indexTicker is NOT aliased in Nexus_Core — must use exact param name
-        # from/to ARE aliased from start/end
-        response = await self.loader.get_polygon_data(
-            session,
-            "indices-aggs",
-            indexTicker="I:VIX",
-            multiplier=1,
-            timespan="day",
-            start=start,
-            end=end,
-            sort="asc",
-        )
-        if response.success and response.data:
-            results = response.data.get("results", [])
-            if results:
-                values = [r["c"] for r in results if "c" in r]
-                if values:
-                    return {
-                        "current": values[-1],
-                        "history": values[-63:],
-                    }
-
-        logger.warning("Polygon VIX fetch failed, falling back to FRED VIXCLS")
-
-        # Fallback: FRED VIXCLS
+        """Fetch VIX from FRED (VIXCLS)."""
         response = await self.loader.get_fred_data(
             session,
             "series",
@@ -144,7 +118,7 @@ class MacroDataFetcher:
                     "history": values[-63:],
                 }
 
-        logger.error("VIX fetch failed from both Polygon and FRED")
+        logger.error("VIX (VIXCLS) fetch failed")
         return {}
 
     async def _fetch_tnx(self, session: aiohttp.ClientSession, start: str, end: str) -> dict:
@@ -222,9 +196,9 @@ class MacroDataFetcher:
             self.loader.get_polygon_data(
                 session,
                 "aggs_daily",
-                ticker=t,
-                from_date=start,
-                to_date=end,
+                symbol=t,
+                start=start,
+                end=end,
                 sort="asc",
             )
             for t in tickers
