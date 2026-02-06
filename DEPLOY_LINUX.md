@@ -8,6 +8,10 @@ cd /home/safrtam
 git clone https://github.com/Maeshowe/atlas_macro.git
 cd atlas_macro
 
+# Ensure Nexus_Core is available (required for data ingestion)
+# Atlas auto-discovers it at ~/SSH-Services/Nexus_Core or ~/Nexus_Core
+ls ~/SSH-Services/Nexus_Core/src/data_loader  # verify it exists
+
 # Run deployment script
 chmod +x scripts/deploy_linux.sh
 ./scripts/deploy_linux.sh

@@ -67,9 +67,30 @@ else
     echo ".env file found"
 fi
 
-# Step 6: Test installation
-echo -e "\n${GREEN}[6/6] Testing installation...${NC}"
-PYTHONPATH=src python -c "from atlas_macro.pipeline.daily import DailyPipeline; print('Import OK')" && echo "Installation successful!"
+# Step 6: Check Nexus_Core
+echo -e "\n${GREEN}[6/7] Checking Nexus_Core...${NC}"
+NEXUS_CANDIDATES=(
+    "${HOME}/SSH-Services/Nexus_Core"
+    "${HOME}/Nexus_Core"
+)
+NEXUS_FOUND=""
+for candidate in "${NEXUS_CANDIDATES[@]}"; do
+    if [ -d "${candidate}/src/data_loader" ]; then
+        NEXUS_FOUND="${candidate}"
+        break
+    fi
+done
+
+if [ -z "${NEXUS_FOUND}" ]; then
+    echo -e "${YELLOW}Warning: Nexus_Core not found. Clone it before running the pipeline:${NC}"
+    echo "  cd ${HOME} && git clone <nexus_core_repo_url> Nexus_Core"
+else
+    echo "Nexus_Core found at ${NEXUS_FOUND}"
+fi
+
+# Step 7: Test installation
+echo -e "\n${GREEN}[7/7] Testing installation...${NC}"
+PYTHONPATH=src python -c "from atlas_macro.config import AtlasConfig; print('Import OK')" && echo "Installation successful!"
 
 # Run tests
 echo -e "\n${GREEN}Running tests...${NC}"

@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import os
 import sys
 from datetime import date, timedelta
 from pathlib import Path
@@ -16,10 +17,30 @@ from typing import Any
 
 import aiohttp
 
-# Wire Nexus_Core dependency
-_NEXUS_CORE_SRC = Path("/Users/safrtam/SSH-Services/Nexus_Core/src")
-if str(_NEXUS_CORE_SRC) not in sys.path:
-    sys.path.insert(0, str(_NEXUS_CORE_SRC))
+# Wire Nexus_Core dependency — check env var, then common locations
+_NEXUS_CORE_CANDIDATES = [
+    Path(p) / "src"
+    for p in [
+        os.environ.get("NEXUS_CORE_PATH", ""),
+        Path.home() / "SSH-Services" / "Nexus_Core",
+        Path.home() / "Nexus_Core",
+    ]
+    if p
+]
+
+_nexus_resolved = False
+for _candidate in _NEXUS_CORE_CANDIDATES:
+    if _candidate.is_dir() and (_candidate / "data_loader").is_dir():
+        if str(_candidate) not in sys.path:
+            sys.path.insert(0, str(_candidate))
+        _nexus_resolved = True
+        break
+
+if not _nexus_resolved:
+    raise ImportError(
+        "Nexus_Core not found. Set NEXUS_CORE_PATH or clone it next to atlas_macro. "
+        "Searched: " + ", ".join(str(c) for c in _NEXUS_CORE_CANDIDATES)
+    )
 
 from data_loader import DataLoader  # noqa: E402
 
