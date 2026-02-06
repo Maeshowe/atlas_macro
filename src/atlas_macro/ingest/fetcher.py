@@ -71,7 +71,7 @@ class MacroDataFetcher:
             results = await asyncio.gather(
                 self._fetch_vix(session, lookback_start, as_of_str),
                 self._fetch_tnx(session, lookback_start, as_of_str),
-                self._fetch_t10y2y(session),
+                self._fetch_t10y2y(session, as_of_str),
                 self._fetch_hy_spread(session, lookback_start, as_of_str),
                 self._fetch_index_prices(session, lookback_start, as_of_str),
                 return_exceptions=True,
@@ -164,12 +164,13 @@ class MacroDataFetcher:
         logger.error("TNX (DGS10) fetch failed")
         return {}
 
-    async def _fetch_t10y2y(self, session: aiohttp.ClientSession) -> dict:
-        """Fetch 10Y-2Y spread from FRED."""
+    async def _fetch_t10y2y(self, session: aiohttp.ClientSession, end: str) -> dict:
+        """Fetch 10Y-2Y spread from FRED as of the given date."""
         response = await self.loader.get_fred_data(
             session,
             "series",
             series_id="T10Y2Y",
+            observation_end=end,
             sort_order="desc",
             limit=5,
         )
