@@ -24,7 +24,7 @@ VENV_DIR="${INSTALL_DIR}/.venv"
 echo "Install directory: ${INSTALL_DIR}"
 
 # Step 1: Check Python version
-echo -e "\n${GREEN}[1/6] Checking Python version...${NC}"
+echo -e "\n${GREEN}[1/7] Checking Python version...${NC}"
 PYTHON_VERSION=$(python3 --version 2>&1 | cut -d' ' -f2 | cut -d'.' -f1,2)
 REQUIRED_VERSION="3.11"
 
@@ -34,8 +34,19 @@ if [ "$(printf '%s\n' "$REQUIRED_VERSION" "$PYTHON_VERSION" | sort -V | head -n1
 fi
 echo "Python ${PYTHON_VERSION} OK"
 
-# Step 2: Create virtual environment
-echo -e "\n${GREEN}[2/6] Setting up virtual environment...${NC}"
+# Step 2: Initialize git submodules (Nexus_Core)
+echo -e "\n${GREEN}[2/7] Initializing git submodules...${NC}"
+git submodule update --init --recursive
+if [ -d "${INSTALL_DIR}/vendor/Nexus_Core/src/data_loader" ]; then
+    echo "Nexus_Core submodule OK"
+else
+    echo -e "${RED}Error: Nexus_Core submodule failed to initialize${NC}"
+    echo "  Try: git submodule update --init --recursive"
+    exit 1
+fi
+
+# Step 3: Create virtual environment
+echo -e "\n${GREEN}[3/7] Setting up virtual environment...${NC}"
 if [ ! -d "${VENV_DIR}" ]; then
     python3 -m venv "${VENV_DIR}"
     echo "Created virtual environment at ${VENV_DIR}"
@@ -46,19 +57,19 @@ fi
 # Activate venv
 source "${VENV_DIR}/bin/activate"
 
-# Step 3: Install dependencies
-echo -e "\n${GREEN}[3/6] Installing dependencies...${NC}"
+# Step 4: Install dependencies
+echo -e "\n${GREEN}[4/7] Installing dependencies...${NC}"
 pip install --upgrade pip
 pip install -e ".[dev]"
 
-# Step 4: Create required directories
-echo -e "\n${GREEN}[4/6] Creating data directories...${NC}"
+# Step 5: Create required directories
+echo -e "\n${GREEN}[5/7] Creating data directories...${NC}"
 mkdir -p "${INSTALL_DIR}/data/output"
 mkdir -p "${INSTALL_DIR}/data/cache"
 mkdir -p "${INSTALL_DIR}/logs"
 
-# Step 5: Check for .env file
-echo -e "\n${GREEN}[5/6] Checking configuration...${NC}"
+# Step 6: Check for .env file
+echo -e "\n${GREEN}[6/7] Checking configuration...${NC}"
 if [ ! -f "${INSTALL_DIR}/.env" ]; then
     echo -e "${YELLOW}Warning: .env file not found. Creating from template...${NC}"
     cp "${INSTALL_DIR}/.env.example" "${INSTALL_DIR}/.env"
@@ -67,30 +78,9 @@ else
     echo ".env file found"
 fi
 
-# Step 6: Check Nexus_Core
-echo -e "\n${GREEN}[6/7] Checking Nexus_Core...${NC}"
-NEXUS_CANDIDATES=(
-    "${HOME}/SSH-Services/Nexus_Core"
-    "${HOME}/Nexus_Core"
-)
-NEXUS_FOUND=""
-for candidate in "${NEXUS_CANDIDATES[@]}"; do
-    if [ -d "${candidate}/src/data_loader" ]; then
-        NEXUS_FOUND="${candidate}"
-        break
-    fi
-done
-
-if [ -z "${NEXUS_FOUND}" ]; then
-    echo -e "${YELLOW}Warning: Nexus_Core not found. Clone it before running the pipeline:${NC}"
-    echo "  cd ${HOME} && git clone <nexus_core_repo_url> Nexus_Core"
-else
-    echo "Nexus_Core found at ${NEXUS_FOUND}"
-fi
-
 # Step 7: Test installation
 echo -e "\n${GREEN}[7/7] Testing installation...${NC}"
-PYTHONPATH=src python -c "from atlas_macro.config import AtlasConfig; print('Import OK')" && echo "Installation successful!"
+PYTHONPATH=src python -c "from atlas_macro.pipeline.daily import DailyPipeline; print('Import OK')" && echo "Installation successful!"
 
 # Run tests
 echo -e "\n${GREEN}Running tests...${NC}"

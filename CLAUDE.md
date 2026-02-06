@@ -11,7 +11,7 @@ ingest (async) → features → normalization → classifier → explain → pip
 ```
 
 - **Async boundary**: Only `ingest/fetcher.py` is async. Everything else is synchronous.
-- **Nexus_Core**: Imported via `sys.path` in `ingest/fetcher.py` only. Path: `/Users/safrtam/SSH-Services/Nexus_Core/src`. Provides Polygon + FRED API access with caching, circuit breaker, retry.
+- **Nexus_Core**: Git submodule at `vendor/Nexus_Core/`. Imported via `sys.path` in `ingest/fetcher.py` only. Provides Polygon + FRED API access with caching, circuit breaker, retry.
 - **Immutability**: All intermediate types are `@dataclass(frozen=True)` in `types.py`.
 - **Config**: Single source of truth in `config.py`. All thresholds are named and centralized.
 

@@ -3,14 +3,10 @@
 ## Quick Start
 
 ```bash
-# Clone repository
+# Clone repository (--recursive pulls Nexus_Core submodule)
 cd /home/safrtam
-git clone https://github.com/Maeshowe/atlas_macro.git
+git clone --recursive https://github.com/Maeshowe/atlas_macro.git
 cd atlas_macro
-
-# Ensure Nexus_Core is available (required for data ingestion)
-# Atlas auto-discovers it at ~/SSH-Services/Nexus_Core or ~/Nexus_Core
-ls ~/SSH-Services/Nexus_Core/src/data_loader  # verify it exists
 
 # Run deployment script
 chmod +x scripts/deploy_linux.sh
@@ -157,5 +153,6 @@ PYTHONPATH=src python -m pytest tests/ -v
 ```bash
 cd /home/safrtam/atlas_macro
 git pull origin master
+git submodule update --init --recursive
 sudo systemctl restart atlas-dashboard
 ```

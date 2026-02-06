@@ -1,0 +1,3 @@
+[submodule "vendor/Nexus_Core"]
+	path = vendor/Nexus_Core
+	url = https://github.com/Maeshowe/Nexus_Core.git
