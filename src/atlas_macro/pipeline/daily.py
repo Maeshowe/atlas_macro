@@ -161,12 +161,17 @@ class DailyPipeline:
             "mean_pairwise_corr": result.features.mean_pairwise_correlation,
         }
 
+        new_row = pd.DataFrame([row])
         if history_file.exists():
-            df = pd.read_parquet(history_file)
-            df = pd.concat([df, pd.DataFrame([row])], ignore_index=True)
+            existing = pd.read_parquet(history_file)
+            # Ensure matching columns to avoid FutureWarning on concat with all-NA cols
+            for col in new_row.columns:
+                if col not in existing.columns:
+                    existing[col] = None
+            df = pd.concat([existing, new_row], ignore_index=True)
             df = df.drop_duplicates(subset=["date"], keep="last")
         else:
-            df = pd.DataFrame([row])
+            df = new_row
 
         df.to_parquet(history_file, index=False)
         logger.info(f"Saved to {daily_file} and {history_file}")
