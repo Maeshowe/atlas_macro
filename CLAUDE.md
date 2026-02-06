@@ -44,7 +44,7 @@ ingest (async) → features → normalization → classifier → explain → pip
 ## Data Sources
 | Data | Source | Endpoint |
 |------|--------|----------|
-| VIX | FRED | `VIXCLS` |
+| VIX | Polygon (primary), FRED (fallback) | `aggs_daily` symbol=`I:VIX` / `VIXCLS` |
 | SPY/QQQ/IWM/DIA prices | Polygon | `aggs_daily` (param: `symbol`) |
 | 10Y Treasury (TNX) | FRED | `DGS10` |
 | Yield curve | FRED | `T10Y2Y` |

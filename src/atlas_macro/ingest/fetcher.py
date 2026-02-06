@@ -101,7 +101,29 @@ class MacroDataFetcher:
             )
 
     async def _fetch_vix(self, session: aiohttp.ClientSession, start: str, end: str) -> dict:
-        """Fetch VIX from FRED (VIXCLS)."""
+        """Fetch VIX from Polygon (I:VIX via aggs_daily), fallback to FRED (VIXCLS)."""
+        # Primary: Polygon — I:VIX uses the same aggs path as equities
+        response = await self.loader.get_polygon_data(
+            session,
+            "aggs_daily",
+            symbol="I:VIX",
+            start=start,
+            end=end,
+            sort="asc",
+        )
+        if response.success and response.data:
+            results = response.data.get("results", [])
+            if results:
+                values = [r["c"] for r in results if "c" in r]
+                if values:
+                    return {
+                        "current": values[-1],
+                        "history": values[-64:-1],  # exclude current day
+                    }
+
+        logger.warning("Polygon VIX fetch failed, falling back to FRED VIXCLS")
+
+        # Fallback: FRED VIXCLS
         response = await self.loader.get_fred_data(
             session,
             "series",
@@ -115,10 +137,10 @@ class MacroDataFetcher:
             if values:
                 return {
                     "current": values[-1],
-                    "history": values[-63:],
+                    "history": values[-64:-1],  # exclude current day
                 }
 
-        logger.error("VIX (VIXCLS) fetch failed")
+        logger.error("VIX fetch failed from both Polygon and FRED")
         return {}
 
     async def _fetch_tnx(self, session: aiohttp.ClientSession, start: str, end: str) -> dict:
@@ -136,7 +158,7 @@ class MacroDataFetcher:
             if values:
                 return {
                     "current": values[-1],
-                    "history_20d": values[-20:],
+                    "history_20d": values[-21:-1],  # exclude current day
                 }
 
         logger.error("TNX (DGS10) fetch failed")
@@ -181,7 +203,7 @@ class MacroDataFetcher:
             if values:
                 return {
                     "current": values[-1],
-                    "history": values[-63:],
+                    "history": values[-64:-1],  # exclude current day
                 }
 
         logger.error("HY spread (BAMLH0A0HYM2) fetch failed")
